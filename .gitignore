@@ -141,3 +141,4 @@ cython_debug/
 # custom
 .DS_Store
 env_file
+*.csv
