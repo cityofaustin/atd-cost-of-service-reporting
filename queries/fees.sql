@@ -74,15 +74,15 @@ FROM   accountbillfee
        JOIN accountpayment
          ON ( accountpayment.paymentnumber =
             accountpaymentdetail.paymentnumber )
-       JOIN validsub
+       left outer JOIN validsub
          ON ( folder.subcode = validsub.subcode )
-       JOIN validwork
+       left outer JOIN validwork
          ON ( folder.workcode = validwork.workcode )
-       JOIN folderpeople
+       left outer JOIN folderpeople
          ON ( folder.folderrsn = folderpeople.folderrsn
               AND folderpeople.peoplecode = 1 )
-       JOIN people
+       left outer JOIN people
          ON ( folderpeople.peoplersn = people.peoplersn )
 WHERE  accountpayment.voidflag = 'N'
        AND accountpayment.paymenttype = 'COS'
-       AND accountpayment.paymentdate > To_date('09/30/2021', 'mm/dd/yyyy'); 
+       AND accountpayment.paymentdate > To_date('09/30/2021', 'mm/dd/yyyy');
