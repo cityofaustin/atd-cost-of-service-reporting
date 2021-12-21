@@ -4,6 +4,7 @@
 SELECT folder.folderrsn,
        folder.foldername,
        folder.folderdescription,
+       folder.folderyear || ' ' || folder.foldersequence || ' ' || folder.foldertype as folder_id,
        To_char(folder.indate, 'YYYY-MM-DD')              AS INDATE,
        folder.foldertype,
        validsub.subdesc,
@@ -25,6 +26,10 @@ SELECT folder.folderrsn,
         FROM   folderinfo
         WHERE  folderinfo.folderrsn = accountbillfee.folderrsn
                AND folderinfo.infocode = 76360)          cip_project_manager,
+        (SELECT infovalue
+        FROM   folderinfo
+        WHERE  folderinfo.folderrsn = accountbillfee.folderrsn
+               AND folderinfo.infocode = 75074)          partner_dept_name,
        people.namefirst,
        people.namelast,
        people.organizationname,
