@@ -1,3 +1,6 @@
+"""
+docker run --env-file env_file --rm -it -v /Users/john/Dropbox/atd/atd-cost-of-service-reporting:/app atddocker/amanda-reporting /bin/bash
+"""
 import logging
 import os
 import sys
@@ -57,7 +60,7 @@ FIELDS = [
     {"amanda": "cip_id_number", "knack": "field_337"},
     {"amanda": "stampuser", "knack": "field_316"},
     {"amanda": "partner_dept_name", "knack": "field_342"},
-    {"amanda": "folder_id", "knack": "field_355"}
+    {"amanda": "folder_id", "knack": "field_355"},
 ]
 
 
@@ -156,13 +159,14 @@ def main():
         {"id": row["id"], KNACK_IS_DELETED_FIELD: True}
         for row in rows_knack
         if row[pk_field["knack"]] not in amanda_id_list
+        and not row[KNACK_IS_DELETED_FIELD]
     ]
 
     logger.info(f"{len(new_rows_knack)} fee records to create")
 
     for row in new_rows_knack:
         app.record(method="create", obj=KNACK_OBJECT, data=row)
-        print("created one")
+        logger.info(f"Created Account Bill RSN: {row['field_285']}")
 
     logger.info(f"{len(delete_rows_knack)} fee records to delete")
 
