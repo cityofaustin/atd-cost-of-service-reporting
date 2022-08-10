@@ -196,11 +196,12 @@ def main():
     for row in delete_rows_knack:
         # soft delete fee records
         app.record(method="update", obj=KNACK_OBJECT, data=row)
+        logger.info(f"Soft-deleted knack row id {row['id']}")
 
     for row in reactiveate_rows_knack:
         # soft delete fee records
         app.record(method="update", obj=KNACK_OBJECT, data=row)
-        logger.info("LOGGG SOMETHING")
+        logger.info(f"Reactivated Knack row id {row['id']}")
 
 
 if __name__ == "__main__":
