@@ -99,7 +99,7 @@ def load_query(fname):
 
 
 def fetch_amanda_records():
-    logger.debug("Fetching AMANDA records...")
+    logger.info("Fetching AMANDA records...")
 
     conn = get_conn(HOST, PORT, SERVICE, USER, PASSWORD)
     query = load_query(QUERYPATH)
@@ -135,7 +135,9 @@ def map_row(row):
 
 
 def main():
+    logger.info("Instanciating Knack app...")
     app = knackpy.App(app_id=KNACK_APP_ID, api_key=KNACK_API_KEY)
+
     rows_amanda = fetch_amanda_records()
     rows_amanda = lower_case_keys(rows_amanda)
     if not rows_amanda:
@@ -143,37 +145,63 @@ def main():
             "No data was retrieved from the AMANDA database. This should never happen!"
         )
 
-    logger.debug("Fetching Knack records...")
+    logger.info("Fetching Knack records...")
     rows_knack = [dict(row) for row in app.get(KNACK_VIEW)]
-    pk_field = get_pk_field()
-    knack_id_list = build_id_list(rows_knack, pk_field["knack"])
-    amanda_id_list = build_id_list(rows_amanda, pk_field["amanda"])
-
-    new_rows_amanda = [
-        row for row in rows_amanda if row[pk_field["amanda"]] not in knack_id_list
+    rows_knack_deleted = [
+        row for row in rows_knack if row[KNACK_IS_DELETED_FIELD] == True
+    ]
+    rows_knack_active = [
+        row for row in rows_knack if row[KNACK_IS_DELETED_FIELD] == False
     ]
 
+    pk_field = get_pk_field()
+
+    # construct some lists of record PKs to make life easier
+    knack_id_list_deleted = build_id_list(rows_knack_deleted, pk_field["knack"])
+    knack_id_list_active = build_id_list(rows_knack_active, pk_field["knack"])
+    knack_id_list_all = knack_id_list_deleted + knack_id_list_active
+    amanda_id_list = build_id_list(rows_amanda, pk_field["amanda"])
+
+    # identify amanda records not in Knack
+    new_rows_amanda = [
+        row for row in rows_amanda if row[pk_field["amanda"]] not in knack_id_list_all
+    ]
+
+    # construct record payload for new rows
     new_rows_knack = [map_row(row) for row in new_rows_amanda]
 
+    # construct payload for records in Knack which are deleted but are now active in Amanda
+    # this could happen if a fee was voided by mistake
+    reactiveate_rows_knack = [
+        {"id": row["id"], KNACK_IS_DELETED_FIELD: False}
+        for row in rows_knack_deleted
+        if row[pk_field["knack"]] in amanda_id_list
+    ]
+
+    # identify active records in Knack which have been deleted in Amanda
     delete_rows_knack = [
         {"id": row["id"], KNACK_IS_DELETED_FIELD: True}
-        for row in rows_knack
+        for row in rows_knack_active
         if row[pk_field["knack"]] not in amanda_id_list
-        and not row[KNACK_IS_DELETED_FIELD]
     ]
 
     logger.info(f"{len(new_rows_knack)} fee records to create")
+    logger.info(f"{len(reactiveate_rows_knack)} fee records to re-activate")
+    logger.info(f"{len(delete_rows_knack)} to delete")
 
     for row in new_rows_knack:
         app.record(method="create", obj=KNACK_OBJECT, data=row)
         logger.info(f"Created Account Bill RSN: {row['field_285']}")
 
-    logger.info(f"{len(delete_rows_knack)} fee records to delete")
-
     for row in delete_rows_knack:
         # soft delete fee records
         app.record(method="update", obj=KNACK_OBJECT, data=row)
-        print("updated one")
+        logger.info(f"Soft-deleted knack row id {row['id']}")
+
+    for row in reactiveate_rows_knack:
+        # soft delete fee records
+        app.record(method="update", obj=KNACK_OBJECT, data=row)
+        logger.info(f"Reactivated Knack row id {row['id']}")
 
 
 if __name__ == "__main__":
