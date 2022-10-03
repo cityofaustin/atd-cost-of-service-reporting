@@ -1,5 +1,5 @@
 """
-docker run --env-file env_file --rm -it -v /some/path/atd-cost-of-service-reporting:/app atddocker/amanda-reporting /bin/bash
+docker run --env-file env_file --rm -it -v /some/path/atd-cost-of-service-reporting:/app atddocker/atd-cost-of-service /bin/bash
 """
 import logging
 import os
@@ -7,6 +7,7 @@ import sys
 
 import cx_Oracle
 import knackpy
+import requests
 from config import FIELDS, QUERYPATH, KNACK_IS_DELETED_FIELD, KNACK_OBJECT, KNACK_VIEW
 
 # db vars
@@ -146,17 +147,27 @@ def main():
     logger.info(f"{len(delete_rows_knack)} to delete")
 
     for row in new_rows_knack:
-        app.record(method="create", obj=KNACK_OBJECT, data=row)
+        try:
+            app.record(method="create", obj=KNACK_OBJECT, data=row)
+        except requests.exceptions.HTTPError as e:
+            logger.error(e.response.text)
+            raise e
         logger.info(f"Created Account Bill RSN: {row['field_285']}")
 
     for row in delete_rows_knack:
-        # soft delete fee records
-        app.record(method="update", obj=KNACK_OBJECT, data=row)
+        try:
+            app.record(method="update", obj=KNACK_OBJECT, data=row)
+        except requests.exceptions.HTTPError as e:
+            logger.error(e.response.text)
+            raise e
         logger.info(f"Soft-deleted knack row id {row['id']}")
 
     for row in reactiveate_rows_knack:
-        # soft delete fee records
-        app.record(method="update", obj=KNACK_OBJECT, data=row)
+        try:
+            app.record(method="update", obj=KNACK_OBJECT, data=row)
+        except requests.exceptions.HTTPError as e:
+            logger.error(e.response.text)
+            raise e
         logger.info(f"Reactivated Knack row id {row['id']}")
 
 
