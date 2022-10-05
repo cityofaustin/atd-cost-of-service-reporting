@@ -1,5 +1,5 @@
 """
-docker run --env-file env_file --rm -it -v /Users/john/Dropbox/atd/atd-cost-of-service-reporting:/app atddocker/amanda-reporting /bin/bash
+docker run --env-file env_file --rm -it -v /some/path/atd-cost-of-service-reporting:/app atddocker/atd-cost-of-service /bin/bash
 """
 import logging
 import os
@@ -7,6 +7,8 @@ import sys
 
 import cx_Oracle
 import knackpy
+import requests
+from config import FIELDS, QUERYPATH, KNACK_IS_DELETED_FIELD, KNACK_OBJECT, KNACK_VIEW
 
 # db vars
 USER = os.getenv("USER")
@@ -17,51 +19,6 @@ SERVICE = os.getenv("SERVICE")
 # knack auth
 KNACK_API_KEY = os.getenv("KNACK_API_KEY")
 KNACK_APP_ID = os.getenv("KNACK_APP_ID")
-# config
-QUERYPATH = "queries/fees.sql"
-KNACK_VIEW = "view_54"
-KNACK_OBJECT = "object_14"
-KNACK_IS_DELETED_FIELD = "field_336"
-
-FIELDS = [
-    {"amanda": "accountbillfeersn", "knack": "field_285", "primary_key": True},
-    {"amanda": "feecode", "knack": "field_286"},
-    {"amanda": "feedesc", "knack": "field_287"},
-    {"amanda": "feeamount", "knack": "field_288"},
-    {"amanda": "folderrsn", "knack": "field_289"},
-    {"amanda": "foldername", "knack": "field_290"},
-    {"amanda": "folderdescription", "knack": "field_291"},
-    {"amanda": "indate", "knack": "field_292"},
-    {"amanda": "foldertype", "knack": "field_293"},
-    {"amanda": "subdesc", "knack": "field_294"},
-    {"amanda": "workcode", "knack": "field_295"},
-    {"amanda": "workdesc", "knack": "field_296"},
-    {"amanda": "work_order", "knack": "field_297"},
-    {"amanda": "subproject_id", "knack": "field_298"},
-    {"amanda": "peoplersn", "knack": "field_299"},
-    {"amanda": "namefirst", "knack": "field_300"},
-    {"amanda": "namelast", "knack": "field_301"},
-    {"amanda": "organizationname", "knack": "field_302"},
-    {"amanda": "emailaddress", "knack": "field_303"},
-    {"amanda": "glaccountnumber", "knack": "field_304"},
-    {"amanda": "billnumber", "knack": "field_305"},
-    {"amanda": "billamount", "knack": "field_306"},
-    {"amanda": "paymentamount", "knack": "field_307"},
-    {"amanda": "paymenttype", "knack": "field_308"},
-    {"amanda": "paymentnumber", "knack": "field_309"},
-    {"amanda": "paymentdate", "knack": "field_310"},
-    {"amanda": "fund", "knack": "field_311"},
-    {"amanda": "dept", "knack": "field_312"},
-    {"amanda": "unit", "knack": "field_313"},
-    {"amanda": "object", "knack": "field_314"},
-    {"amanda": "locationcode", "knack": "field_315"},
-    {"amanda": "feecomment", "knack": "field_339"},
-    {"amanda": "cip_project_manager", "knack": "field_341"},
-    {"amanda": "cip_id_number", "knack": "field_337"},
-    {"amanda": "stampuser", "knack": "field_316"},
-    {"amanda": "partner_dept_name", "knack": "field_342"},
-    {"amanda": "folder_id", "knack": "field_355"},
-]
 
 
 def getLogger(name, level=logging.INFO):
@@ -190,17 +147,27 @@ def main():
     logger.info(f"{len(delete_rows_knack)} to delete")
 
     for row in new_rows_knack:
-        app.record(method="create", obj=KNACK_OBJECT, data=row)
+        try:
+            app.record(method="create", obj=KNACK_OBJECT, data=row)
+        except requests.exceptions.HTTPError as e:
+            logger.error(e.response.text)
+            raise e
         logger.info(f"Created Account Bill RSN: {row['field_285']}")
 
     for row in delete_rows_knack:
-        # soft delete fee records
-        app.record(method="update", obj=KNACK_OBJECT, data=row)
+        try:
+            app.record(method="update", obj=KNACK_OBJECT, data=row)
+        except requests.exceptions.HTTPError as e:
+            logger.error(e.response.text)
+            raise e
         logger.info(f"Soft-deleted knack row id {row['id']}")
 
     for row in reactiveate_rows_knack:
-        # soft delete fee records
-        app.record(method="update", obj=KNACK_OBJECT, data=row)
+        try:
+            app.record(method="update", obj=KNACK_OBJECT, data=row)
+        except requests.exceptions.HTTPError as e:
+            logger.error(e.response.text)
+            raise e
         logger.info(f"Reactivated Knack row id {row['id']}")
 
 
