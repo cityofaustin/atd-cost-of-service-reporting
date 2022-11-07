@@ -75,7 +75,7 @@ FROM   accountbillfee
        JOIN accountbill
          ON ( accountbillfee.billnumber = accountbill.billnumber )
        JOIN accountpaymentdetail
-         ON ( accountpaymentdetail.billnumber = accountbill.billnumber )
+         ON ( accountpaymentdetail.accountbillfeersn = accountbillfee.accountbillfeersn )
        JOIN accountpayment
          ON ( accountpayment.paymentnumber =
             accountpaymentdetail.paymentnumber )
