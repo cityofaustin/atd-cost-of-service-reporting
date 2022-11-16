@@ -39,4 +39,6 @@ FIELDS = [
     {"amanda": "cip_project_manager", "knack": "field_341"},
     {"amanda": "cip_id_number", "knack": "field_337"},
     {"amanda": "stampuser", "knack": "field_316"},
+    {"amanda": "partner_dept_name", "knack": "field_342"},
+    {"amanda": "folder_id", "knack": "field_355"},
 ]
