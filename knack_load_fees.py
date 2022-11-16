@@ -146,12 +146,15 @@ def main():
     logger.info(f"{len(reactiveate_rows_knack)} fee records to re-activate")
     logger.info(f"{len(delete_rows_knack)} to delete")
 
+    errors = []
+
     for row in new_rows_knack:
         try:
             app.record(method="create", obj=KNACK_OBJECT, data=row)
         except requests.exceptions.HTTPError as e:
-            logger.error(e.response.text)
-            raise e
+            logger.warning(e.response.text)
+            errors.append(e.response.text)
+            continue
         logger.info(f"Created Account Bill RSN: {row['field_285']}")
 
     for row in delete_rows_knack:
@@ -169,6 +172,9 @@ def main():
             logger.error(e.response.text)
             raise e
         logger.info(f"Reactivated Knack row id {row['id']}")
+
+    if errors:
+        raise Exception(f"Script completed with {len(errors)} errors.")
 
 
 if __name__ == "__main__":
