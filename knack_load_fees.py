@@ -174,7 +174,7 @@ def main():
         logger.info(f"Reactivated Knack row id {row['id']}")
 
     if errors:
-        raise Exception(f"Script completed with {len(errors)} errors.")
+        logger.error(f"Script completed with {len(errors)} errors.")
 
 
 if __name__ == "__main__":
