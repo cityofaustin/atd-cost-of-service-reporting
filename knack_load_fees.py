@@ -91,6 +91,35 @@ def map_row(row):
     return new_row
 
 
+def is_dupe_row_error(res):
+    """Checks a Knack API `400` response to see if it's caused by a known issue of attempting
+    to insert duplicate records. There duplicate rows in our AMANDA data due to errors
+    in SQL query. See: https://github.com/cityofaustin/atd-data-tech/issues/10447.
+
+    The response JSON we're handling looks like this:
+    {
+        'errors':
+        [
+            {
+                'field': 'field_285',
+                'type': 'unique',
+                'message': 'Fee Number must be unique. "13646573" is already being used.'
+            }
+        ]
+    }
+
+    Args:
+        res (requests.models.Response): a requests Response object from a Knack API call
+
+    Returns:
+        Bool: true if the response error was caused by the known issue described above.
+    """
+    error = res.json()["errors"][0]
+    if error["type"] == "unique" and error["field"] == "field_285":
+        return True
+    else:
+        return False
+
 def main():
     logger.info("Instanciating Knack app...")
     app = knackpy.App(app_id=KNACK_APP_ID, api_key=KNACK_API_KEY)
@@ -150,8 +179,12 @@ def main():
         try:
             app.record(method="create", obj=KNACK_OBJECT, data=row)
         except requests.exceptions.HTTPError as e:
-            logger.error(e.response.text)
-            raise e
+            if e.response.status_code == 400 and is_dupe_row_error(e.response):
+                # ignore dupe row error
+                logger.warning("Row already exists - ignoring and moving on")
+                continue
+            else:
+                raise e
         logger.info(f"Created Account Bill RSN: {row['field_285']}")
 
     for row in delete_rows_knack:
