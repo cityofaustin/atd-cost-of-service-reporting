@@ -3,7 +3,8 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [production, staging]
+    branches:
+      - production
 
 jobs:
   main:
@@ -23,7 +24,6 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/atd-cost-of-service:production
-            ${{ secrets.DOCKER_USERNAME }}/atd-cost-of-service:staging
             ${{ secrets.DOCKER_USERNAME }}/atd-cost-of-service:latest
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
