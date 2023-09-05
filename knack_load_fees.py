@@ -121,9 +121,10 @@ def is_dupe_row_error(res):
         return False
 
 def main():
-    logger.info("Instanciating Knack app...")
+    logger.info("Instantiating Knack app...")
     app = knackpy.App(app_id=KNACK_APP_ID, api_key=KNACK_API_KEY)
 
+    logger.info("Fetching AMANDA records...")
     rows_amanda = fetch_amanda_records()
     rows_amanda = lower_case_keys(rows_amanda)
     if not rows_amanda:

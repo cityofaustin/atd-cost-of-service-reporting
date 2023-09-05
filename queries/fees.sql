@@ -1,7 +1,7 @@
 -- 
 -- Queries valid cost of service fees from AMANDA DB. Each row is a billed fee
 -- 
-SELECT folder.folderrsn,
+SELECT DISTINCT folder.folderrsn,
        folder.foldername,
        folder.folderdescription,
        folder.folderyear || ' ' || folder.foldersequence || ' ' || folder.foldertype as folder_id,
@@ -47,7 +47,6 @@ SELECT folder.folderrsn,
        accountpayment.paymentnumber,
        accountpayment.paymentamount,
        accountpayment.paymenttype,
-       accountpayment.paymentnumber,
        To_char(accountpayment.paymentdate, 'YYYY-MM-DD') AS paymentdate,
        (SELECT infovalue
         FROM   folderinfo
