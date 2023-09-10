@@ -1,6 +1,6 @@
-
-
-
+-- 
+-- Queries valid cost of service fees from AMANDA DB. Each row is a billed fee
+-- 
 
 SELECT DISTINCT
     folder.folderrsn,

@@ -1,5 +1,5 @@
 """
-docker run --env-file env_file --rm -it -v /some/path/atd-cost-of-service-reporting:/app atddocker/atd-cost-of-service /bin/bash
+docker run --env-file env_file --rm -it -v /Some/path/to/atd-cost-of-service-reporting:/app atddocker/atd-cost-of-service /bin/bash
 """
 import logging
 import os
@@ -91,6 +91,15 @@ def map_row(row):
     return new_row
 
 
+def generate_pk(rows):
+    """Generate a unique key for each row by combining the the bill-fee ID and
+    the bill-payment ID"""
+    for row in rows:
+        row[
+            "accountbillfeersn_paymentnumber"
+        ] = f"{row['accountbillfeersn']}_{row['paymentnumber']}"
+
+
 def is_dupe_row_error(res):
     """Checks a Knack API `400` response to see if it's caused by a known issue of attempting
     to insert duplicate records. There duplicate rows in our AMANDA data due to errors
@@ -120,12 +129,16 @@ def is_dupe_row_error(res):
     else:
         return False
 
+
 def main():
     logger.info("Instanciating Knack app...")
     app = knackpy.App(app_id=KNACK_APP_ID, api_key=KNACK_API_KEY)
 
     rows_amanda = fetch_amanda_records()
     rows_amanda = lower_case_keys(rows_amanda)
+
+    generate_pk(rows_amanda)
+
     if not rows_amanda:
         raise ValueError(
             "No data was retrieved from the AMANDA database. This should never happen!"
@@ -140,9 +153,8 @@ def main():
         row for row in rows_knack if row[KNACK_IS_DELETED_FIELD] == False
     ]
 
-    pk_field = get_pk_field()
-
     # construct some lists of record PKs to make life easier
+    pk_field = get_pk_field()
     knack_id_list_deleted = build_id_list(rows_knack_deleted, pk_field["knack"])
     knack_id_list_active = build_id_list(rows_knack_active, pk_field["knack"])
     knack_id_list_all = knack_id_list_deleted + knack_id_list_active
