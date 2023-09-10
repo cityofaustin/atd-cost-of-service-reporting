@@ -1,8 +1,8 @@
---
--- Queries valid cost of service fees from AMANDA DB. Each row is a billed fee
---
 
-SELECT
+
+
+
+SELECT DISTINCT
     folder.folderrsn,
     folder.foldername,
     folder.folderdescription,
@@ -47,7 +47,9 @@ SELECT
                             folderinfo
                         WHERE
                             folderinfo.folderrsn = accountbillfee.folderrsn
-                            AND folderinfo.infocode = 75074) partner_dept_name, people.namefirst, people.namelast, people.organizationname, people.emailaddress, folderpeople.folderrsn, people.peoplersn, validaccountfee.glaccountnumber, validaccountfee.feedesc, accountbillfee.accountbillfeersn, accountbillfee.feecode, accountbillfee.feeamount, accountbillfee.billnumber, accountbillfee.feecomment, accountbill.billamount, accountpayment.paymentnumber, accountpayment.paymentamount, accountpayment.paymenttype, accountpayment.paymentnumber, To_char(accountpayment.paymentdate, 'YYYY-MM-DD') AS paymentdate, (
+                            AND folderinfo.infocode = 75074) partner_dept_name, people.namefirst, people.namelast, people.organizationname, people.emailaddress, folderpeople.folderrsn, people.peoplersn, validaccountfee.glaccountnumber, validaccountfee.feedesc, accountbillfee.accountbillfeersn, accountbillfee.feecode, accountbillfee.feeamount, accountbillfee.billnumber, accountbillfee.feecomment, accountbill.billamount, accountpayment.paymentnumber, accountpayment.paymentamount, accountpayment.paymenttype,
+                        --accountpayment.paymentnumber,
+                        To_char(accountpayment.paymentdate, 'YYYY-MM-DD') AS paymentdate, (
                             SELECT
                                 infovalue
                             FROM
