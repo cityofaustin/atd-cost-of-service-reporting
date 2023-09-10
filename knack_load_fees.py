@@ -91,23 +91,12 @@ def map_row(row):
     return new_row
 
 
-def generate_pk(rows):
-    """Generate a unique key for each row by combining the the bill-fee ID and
-    the bill-payment ID"""
-    for row in rows:
-        row[
-            "accountbillfeersn_paymentnumber"
-        ] = f"{row['accountbillfeersn']}_{row['paymentnumber']}"
-
-
 def main():
     logger.info("Instanciating Knack app...")
     app = knackpy.App(app_id=KNACK_APP_ID, api_key=KNACK_API_KEY)
 
     rows_amanda = fetch_amanda_records()
     rows_amanda = lower_case_keys(rows_amanda)
-
-    generate_pk(rows_amanda)
 
     if not rows_amanda:
         raise ValueError(
