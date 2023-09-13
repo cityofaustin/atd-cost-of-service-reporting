@@ -152,7 +152,7 @@ def main():
         except requests.exceptions.HTTPError as e:
             logger.error(e.response.text)
             raise e
-        logger.info(f"Created Account Bill RSN: {row['field_285']}")
+        logger.info(f"Created Account Bill RSN: {row[pk_field['knack']]}")
 
     for row in delete_rows_knack:
         try:
