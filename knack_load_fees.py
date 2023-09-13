@@ -150,6 +150,7 @@ def main():
         try:
             app.record(method="create", obj=KNACK_OBJECT, data=row)
         except requests.exceptions.HTTPError as e:
+            logger.error(e.response.text)
             raise e
         logger.info(f"Created Account Bill RSN: {row['field_285']}")
 
