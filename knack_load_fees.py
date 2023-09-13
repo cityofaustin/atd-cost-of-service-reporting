@@ -1,5 +1,5 @@
 """
-docker run --env-file env_file --rm -it -v /some/path/atd-cost-of-service-reporting:/app atddocker/atd-cost-of-service /bin/bash
+docker run --env-file env_file --rm -it -v /Some/path/to/atd-cost-of-service-reporting:/app atddocker/atd-cost-of-service /bin/bash
 """
 import logging
 import os
@@ -91,41 +91,13 @@ def map_row(row):
     return new_row
 
 
-def is_dupe_row_error(res):
-    """Checks a Knack API `400` response to see if it's caused by a known issue of attempting
-    to insert duplicate records. There duplicate rows in our AMANDA data due to errors
-    in SQL query. See: https://github.com/cityofaustin/atd-data-tech/issues/10447.
-
-    The response JSON we're handling looks like this:
-    {
-        'errors':
-        [
-            {
-                'field': 'field_285',
-                'type': 'unique',
-                'message': 'Fee Number must be unique. "13646573" is already being used.'
-            }
-        ]
-    }
-
-    Args:
-        res (requests.models.Response): a requests Response object from a Knack API call
-
-    Returns:
-        Bool: true if the response error was caused by the known issue described above.
-    """
-    error = res.json()["errors"][0]
-    if error["type"] == "unique" and error["field"] == "field_285":
-        return True
-    else:
-        return False
-
 def main():
     logger.info("Instanciating Knack app...")
     app = knackpy.App(app_id=KNACK_APP_ID, api_key=KNACK_API_KEY)
 
     rows_amanda = fetch_amanda_records()
     rows_amanda = lower_case_keys(rows_amanda)
+
     if not rows_amanda:
         raise ValueError(
             "No data was retrieved from the AMANDA database. This should never happen!"
@@ -140,9 +112,8 @@ def main():
         row for row in rows_knack if row[KNACK_IS_DELETED_FIELD] == False
     ]
 
-    pk_field = get_pk_field()
-
     # construct some lists of record PKs to make life easier
+    pk_field = get_pk_field()
     knack_id_list_deleted = build_id_list(rows_knack_deleted, pk_field["knack"])
     knack_id_list_active = build_id_list(rows_knack_active, pk_field["knack"])
     knack_id_list_all = knack_id_list_deleted + knack_id_list_active
@@ -179,12 +150,7 @@ def main():
         try:
             app.record(method="create", obj=KNACK_OBJECT, data=row)
         except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 400 and is_dupe_row_error(e.response):
-                # ignore dupe row error
-                logger.warning("Row already exists - ignoring and moving on")
-                continue
-            else:
-                raise e
+            raise e
         logger.info(f"Created Account Bill RSN: {row['field_285']}")
 
     for row in delete_rows_knack:

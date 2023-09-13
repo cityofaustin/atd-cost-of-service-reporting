@@ -35,3 +35,11 @@ Each time the script runs, it queries all fees in AMANDA, compares the records t
 Records are uniquely identified the `accountbillfeersn` column, which identifies a single permit fee. A single permit often has multiple cost of service fees.
 
 If a fee record exists in AMANDA that does not exist in Knack, the fee record is created in Knack. As well, formerly valid fees are occasionally voided in AMANDA, in which case they will be absent from the AMANDA database. If a fee record exists in Knack but is no longer in the AMANDA extract, the fee record is updated in Knack with a status of `deleted=true`. 
+
+### Run the script in a Docker container
+
+A docker container is available to simulate the production deployment. You can build the from the included Dockerfile, or pull the production image from Docker hub. Mount your local copy of the repo in order to overwrite the production code. You will need to prepare an `env_file` — the details of which can be found in the team password store.
+
+```shell
+docker run --env-file env_file --rm -it -v /path/to/your/repo/atd-cost-of-service-reporting:/app atddocker/atd-cost-of-service python knack_load_fees.py
+```
