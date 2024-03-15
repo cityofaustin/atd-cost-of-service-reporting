@@ -32,6 +32,7 @@ FIELDS = [
     {"amanda": "billnumber", "knack": "field_305"},
     {"amanda": "billamount", "knack": "field_306"},
     {"amanda": "paymentamount", "knack": "field_307"},
+    {"amanda": "paymentcomment", "knack": "field_1095"},
     {"amanda": "paymenttype", "knack": "field_308"},
     {"amanda": "paymentnumber", "knack": "field_309"},
     {"amanda": "paymentdate", "knack": "field_310"},
