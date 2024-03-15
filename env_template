@@ -1,0 +1,10 @@
+# amanda / oracle config
+USER=
+PASSWORD=
+HOST=
+PORT=
+SERVICE=
+
+# knack config
+KNACK_API_KEY=
+KNACK_APP_ID=
