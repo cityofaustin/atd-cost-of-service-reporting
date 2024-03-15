@@ -4,7 +4,11 @@ KNACK_OBJECT = "object_14"
 KNACK_IS_DELETED_FIELD = "field_336"
 
 FIELDS = [
-    {"amanda": "accountbillfeersn_paymentnumber", "knack": "field_956", "primary_key": True},
+    {
+        "amanda": "accountbillfeersn_paymentnumber",
+        "knack": "field_956",
+        "primary_key": True,
+    },
     {"amanda": "accountbillfeersn", "knack": "field_285"},
     {"amanda": "feecode", "knack": "field_286"},
     {"amanda": "feedesc", "knack": "field_287"},
