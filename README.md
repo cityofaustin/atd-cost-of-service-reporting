@@ -14,7 +14,6 @@ Austin Transportation provides various permitting services for fellow City depar
 4. Each department is sent a list of the fees they have accrued. Departments review the fee list and confirm the assessment is accurate and provide funding numbers (FDUs) from which funds will be drawn to pay the fee balance.
 5. Once approved, ATD Finance staff create journal vouchers which transfer funds from the partner department to ATD.
 
-
 ### Technical process
 
 We use a Knack application, the "Right of Way Portal" as canonical repository for tracking these fees. This app allows business users to review, download, and distribute fee records for further review and processing by staff.
@@ -34,12 +33,24 @@ Each time the script runs, it queries all fees in AMANDA, compares the records t
 
 Records are uniquely identified the `accountbillfeersn` column, which identifies a single permit fee. A single permit often has multiple cost of service fees.
 
-If a fee record exists in AMANDA that does not exist in Knack, the fee record is created in Knack. As well, formerly valid fees are occasionally voided in AMANDA, in which case they will be absent from the AMANDA database. If a fee record exists in Knack but is no longer in the AMANDA extract, the fee record is updated in Knack with a status of `deleted=true`. 
+If a fee record exists in AMANDA that does not exist in Knack, the fee record is created in Knack. As well, formerly valid fees are occasionally voided in AMANDA, in which case they will be absent from the AMANDA database. If a fee record exists in Knack but is no longer in the AMANDA extract, the fee record is updated in Knack with a status of `deleted=true`.
 
-### Run the script in a Docker container
+### Development environment
 
-A docker container is available to simulate the production deployment. You can build the from the included Dockerfile, or pull the production image from Docker hub. Mount your local copy of the repo in order to overwrite the production code. You will need to prepare an `env_file` — the details of which can be found in the team password store.
+A `docker compose` stack is in place to aid in the development of the software in this repository.
 
-```shell
-docker run --env-file env_file --rm -it -v /path/to/your/repo/atd-cost-of-service-reporting:/app atddocker/atd-cost-of-service python knack_load_fees.py
+#### Usage
+
+First, copy the `env_template` file to `env` and fill in the necessary environment variables.
+
+Then, to enter into a `bash` shell inside a container that simulates the environment that the script will be run in when invoked by airflow.
+
+```sql
+docker compose run reporting
+```
+
+And then to run the program inside that shell:
+
+```sql
+./knack_load_fees.py
 ```
