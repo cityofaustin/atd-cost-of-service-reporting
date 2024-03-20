@@ -1,5 +1,8 @@
+#!/usr/bin/env python3
 """
-docker run --env-file env_file --rm -it -v /Some/path/to/atd-cost-of-service-reporting:/app atddocker/atd-cost-of-service /bin/bash
+
+# to start the image for development
+docker compose run reporting
 """
 import logging
 import os

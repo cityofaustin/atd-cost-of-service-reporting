@@ -1,0 +1,11 @@
+version: "3"
+services:
+  reporting:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    entrypoint: /bin/bash
+    env_file:
+      - env

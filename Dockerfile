@@ -1,11 +1,7 @@
-FROM atddocker/atd-oracle-py:production
+FROM ghcr.io/oracle/oraclelinux8-instantclient:19
 
-# Copy our own application
 WORKDIR /app
 COPY . /app
 
-RUN chmod -R 755 /app/*
-
-# # Proceed to install the requirements...do
-RUN cd /app && apt-get --allow-releaseinfo-change update 
-RUN pip install -r requirements.txt
+RUN dnf update && dnf install -y python3 python3-pip vim
+RUN pip3 install -r requirements.txt
