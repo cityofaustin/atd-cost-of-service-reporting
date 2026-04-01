@@ -4,7 +4,7 @@ name: Docker Image CI
 on:
   push:
     branches:
-      # - production
+      - production
 
 jobs:
   build-image-and-push:
@@ -32,8 +32,8 @@ jobs:
         with:
           push: true
           platforms: linux/amd64,linux/arm64
-            # ${{ secrets.DOCKER_USERNAME }}/atd-cost-of-service:production
           tags: |
+            ${{ secrets.DOCKER_USERNAME }}/atd-cost-of-service:production
             ${{ secrets.DOCKER_USERNAME }}/atd-cost-of-service:latest
       -
         name: Image digest
